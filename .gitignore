@@ -1,0 +1,11 @@
+# MAC-specific
+.DS_Store
+
+# Gradle
+.gradle/
+
+# IntelliJ
+out/
+build/
+.idea/
+*.iml

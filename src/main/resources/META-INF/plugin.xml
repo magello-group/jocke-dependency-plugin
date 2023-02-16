@@ -1,0 +1,30 @@
+<idea-plugin>
+    <id>com.magello.jockes-dependency-plugin</id>
+    <name>Jockes-Dependency-Handler</name>
+    <vendor email="joakim.anell@magello.se" url="https://magello.se">Magello</vendor>
+
+    <description><![CDATA[
+    Handles conversion of Maven and Gradle Groovy dependencies to Gradle Kotlin dependencies.<br><br>
+
+    Joakim is your friend 👊
+    ]]></description>
+
+    <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>org.intellij.groovy</depends>
+    <depends>com.intellij.gradle</depends>
+    <depends>com.intellij.java</depends>
+    <depends>org.jetbrains.kotlin</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+        <copyPastePreProcessor implementation="org.jocke.plugin.EverythingToGradle" order="first" />
+    </extensions>
+
+    <idea-version since-build="223.*"/>
+
+    <actions>
+        <!-- Add your actions here -->
+    </actions>
+</idea-plugin>
