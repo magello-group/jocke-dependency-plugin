@@ -6,24 +6,36 @@ data class GradleDependency(
   val function: Function,
   var name: String = "",
   var group: String = "",
-  var version: String = "",
+  var version: String? = null,
   // TODO: Be able to activate this maybe?
   val withoutIdentifiers: Boolean = true,
-): Dependency {
+) : Dependency {
   override fun toKotlinDsl(): String {
     if (withoutIdentifiers) {
-      return """${function.type}("$group:$name:$version")"""
+      return """${function.type}("$group:$name${version?.let { ":$version" } ?: ""}")"""
     }
-    return """${function.type}(group = "$group", name = "$name", version = "$version")"""
+    return """${function.type}(group = "$group", name = "$name"${version?.let { """, version = "$it"""" } ?: ""})"""
   }
 }
 
 fun parseGroovyCalls(appStatements: List<GrApplicationStatementImpl>): List<GradleDependency> {
   return appStatements.map {
-    val function = Function.fromString(it.callReference!!.methodName) ?: Function.UNKNOWN
+    val function = Function.fromString(it.callReference?.methodName) ?: Function.UNKNOWN
 
     val d = GradleDependency(function)
-    it.argumentList.namedArguments.forEach { n ->
+
+    if (it.argumentList.allArguments.size == 1) {
+      val argument = it.argumentList.allArguments[0]
+      val split = argument.text?.replace("\'", "")?.split(":")
+      d.group = split?.get(0) ?: throw IllegalStateException("Unknown name")
+      d.name = split[1]
+      if (split.size == 3) {
+        d.version = split[2]
+      }
+    }
+
+    val arguments = it.argumentList.namedArguments
+    arguments.forEach { n ->
       when (n.labelName) {
         "name" -> d.name = n.expression?.text?.replace("\'", "") ?: ""
         "group" -> d.group = n.expression?.text?.replace("\'", "") ?: ""
@@ -33,7 +45,7 @@ fun parseGroovyCalls(appStatements: List<GrApplicationStatementImpl>): List<Grad
 
     d
   }.filter {
-    it.function != Function.UNKNOWN || it.name.isNotBlank() || it.group.isNotBlank() || it.group.isNotBlank()
+    it.function != Function.UNKNOWN || it.name.isNotBlank() || it.group.isNotBlank()
   }
 }
 
